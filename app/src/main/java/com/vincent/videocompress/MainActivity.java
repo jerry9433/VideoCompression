@@ -1,15 +1,18 @@
 package com.vincent.videocompress;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -20,7 +23,9 @@ import com.vincent.videocompressor.VideoCompress;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,26 +44,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        int ALL_PERMISSIONS = 101;
+        final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        ActivityCompat.requestPermissions(MainActivity.this, permissions, ALL_PERMISSIONS);
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         initView();
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, 22);
+
     }
+
+
 
     private void initView() {
         Button btn_select = (Button) findViewById(R.id.btn_select);
         btn_select.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                /* 开启Pictures画面Type设定为image */
-                //intent.setType("video/*;image/*");
-                //intent.setType("audio/*"); //选择音频
-                intent.setType("video/*"); //选择视频 （mp4 3gp 是android支持的视频格式）
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent, REQUEST_FOR_VIDEO_FILE);
+                    Intent intent = new Intent();
+                    /* 开启Pictures画面Type设定为image */
+                    //intent.setType("video/*;image/*");
+                    //intent.setType("audio/*"); //选择音频
+                    intent.setType("video/*"); //选择视频 （mp4 3gp 是android支持的视频格式）
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(intent, REQUEST_FOR_VIDEO_FILE);
             }
         });
 
@@ -86,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         pb_compress.setVisibility(View.INVISIBLE);
                         endTime = System.currentTimeMillis();
                         Util.writeFile(MainActivity.this, "End at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
-                        Util.writeFile(MainActivity.this, "Total: " + ((endTime - startTime)/1000) + "s" + "\n");
+                        Util.writeFile(MainActivity.this, "Total: " + ((endTime - startTime) / 1000) + "s" + "\n");
                         Util.writeFile(MainActivity.this);
                     }
 
@@ -149,12 +162,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("deprecation")
-    public static Locale getSystemLocaleLegacy(Configuration config){
+    public static Locale getSystemLocaleLegacy(Configuration config) {
         return config.locale;
     }
 
     @TargetApi(Build.VERSION_CODES.N)
-    public static Locale getSystemLocale(Configuration config){
+    public static Locale getSystemLocale(Configuration config) {
         return config.getLocales().get(0);
     }
 }
