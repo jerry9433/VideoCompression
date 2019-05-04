@@ -3,7 +3,6 @@ package com.vincent.videocompress;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -23,9 +21,7 @@ import com.vincent.videocompressor.VideoCompress;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,32 +54,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void initView() {
-        Button btn_select = (Button) findViewById(R.id.btn_select);
+        Button btn_select = findViewById(R.id.btn_select);
         btn_select.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View view) {
-                    Intent intent = new Intent();
-                    /* 开启Pictures画面Type设定为image */
-                    //intent.setType("video/*;image/*");
-                    //intent.setType("audio/*"); //选择音频
-                    intent.setType("video/*"); //选择视频 （mp4 3gp 是android支持的视频格式）
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(intent, REQUEST_FOR_VIDEO_FILE);
+                Intent intent = new Intent();
+                /* 开启Pictures画面Type设定为image */
+                //intent.setType("video/*;image/*");
+                //intent.setType("audio/*"); //选择音频
+                intent.setType("video/*"); //选择视频 （mp4 3gp 是android支持的视频格式）
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, REQUEST_FOR_VIDEO_FILE);
             }
         });
 
-        Button btn_compress = (Button) findViewById(R.id.btn_compress);
-        btn_compress.setOnClickListener(new View.OnClickListener() {
+        Button btHigh = findViewById(R.id.btCompressHigh);
+        Button btMedium = findViewById(R.id.btCompressMedium);
+        Button btLow = findViewById(R.id.btCompressLow);
+        btHigh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String destPath = tv_output.getText().toString() + File.separator + "VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss", getLocale()).format(new Date()) + ".mp4";
-                VideoCompress.compressVideoLow(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
+                VideoCompress.compressVideoHigh(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
                     @Override
                     public void onStart() {
-                        tv_indicator.setText("Compressing..." + "\n"
+                        tv_indicator.setText("Compressing in high quality..." + "\n"
                                 + "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
                         pb_compress.setVisibility(View.VISIBLE);
                         startTime = System.currentTimeMillis();
@@ -113,19 +110,102 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onProgress(float percent) {
-                        tv_progress.setText(String.valueOf(percent) + "%");
+                        tv_progress.setText(percent + "%");
                     }
                 });
             }
         });
+        btMedium.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String destPath = tv_output.getText().toString() + File.separator + "VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss", getLocale()).format(new Date()) + ".mp4";
+                VideoCompress.compressVideoMedium(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
+                    @Override
+                    public void onStart() {
+                        tv_indicator.setText("Compressing in medium quality..." + "\n"
+                                + "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
+                        pb_compress.setVisibility(View.VISIBLE);
+                        startTime = System.currentTimeMillis();
+                        Util.writeFile(MainActivity.this, "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
+                    }
 
-        tv_input = (TextView) findViewById(R.id.tv_input);
-        tv_output = (TextView) findViewById(R.id.tv_output);
+                    @Override
+                    public void onSuccess() {
+                        String previous = tv_indicator.getText().toString();
+                        tv_indicator.setText(previous + "\n"
+                                + "Compress Success!" + "\n"
+                                + "End at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
+                        pb_compress.setVisibility(View.INVISIBLE);
+                        endTime = System.currentTimeMillis();
+                        Util.writeFile(MainActivity.this, "End at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
+                        Util.writeFile(MainActivity.this, "Total: " + ((endTime - startTime) / 1000) + "s" + "\n");
+                        Util.writeFile(MainActivity.this);
+                    }
+
+                    @Override
+                    public void onFail() {
+                        tv_indicator.setText("Compress Failed!");
+                        pb_compress.setVisibility(View.INVISIBLE);
+                        endTime = System.currentTimeMillis();
+                        Util.writeFile(MainActivity.this, "Failed Compress!!!" + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
+                    }
+
+                    @Override
+                    public void onProgress(float percent) {
+                        tv_progress.setText(percent + "%");
+                    }
+                });
+            }
+        });
+        btLow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String destPath = tv_output.getText().toString() + File.separator + "VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss", getLocale()).format(new Date()) + ".mp4";
+                VideoCompress.compressVideoLow(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
+                    @Override
+                    public void onStart() {
+                        tv_indicator.setText("Compressing in low quality..." + "\n"
+                                + "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
+                        pb_compress.setVisibility(View.VISIBLE);
+                        startTime = System.currentTimeMillis();
+                        Util.writeFile(MainActivity.this, "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        String previous = tv_indicator.getText().toString();
+                        tv_indicator.setText(previous + "\n"
+                                + "Compress Success!" + "\n"
+                                + "End at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
+                        pb_compress.setVisibility(View.INVISIBLE);
+                        endTime = System.currentTimeMillis();
+                        Util.writeFile(MainActivity.this, "End at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
+                        Util.writeFile(MainActivity.this, "Total: " + ((endTime - startTime) / 1000) + "s" + "\n");
+                        Util.writeFile(MainActivity.this);
+                    }
+
+                    @Override
+                    public void onFail() {
+                        tv_indicator.setText("Compress Failed!");
+                        pb_compress.setVisibility(View.INVISIBLE);
+                        endTime = System.currentTimeMillis();
+                        Util.writeFile(MainActivity.this, "Failed Compress!!!" + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
+                    }
+
+                    @Override
+                    public void onProgress(float percent) {
+                        tv_progress.setText(percent + "%");
+                    }
+                });
+            }
+        });
+        tv_input = findViewById(R.id.tv_input);
+        tv_output = findViewById(R.id.tv_output);
         tv_output.setText(outputDir);
-        tv_indicator = (TextView) findViewById(R.id.tv_indicator);
-        tv_progress = (TextView) findViewById(R.id.tv_progress);
+        tv_indicator = findViewById(R.id.tv_indicator);
+        tv_progress = findViewById(R.id.tv_progress);
 
-        pb_compress = (ProgressBar) findViewById(R.id.pb_compress);
+        pb_compress = findViewById(R.id.pb_compress);
     }
 
     @Override
