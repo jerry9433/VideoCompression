@@ -1,6 +1,7 @@
 package com.vincent.videocompress;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -11,10 +12,12 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.Calendar;
@@ -191,5 +194,44 @@ public class Util {
         }
 
         return version;
+    }
+
+    public static File saveTempFile(String fileName, Context context, Uri uri) {
+
+        File mFile = null;
+        ContentResolver resolver = context.getContentResolver();
+        InputStream in = null;
+        FileOutputStream out = null;
+
+        try {
+            in = resolver.openInputStream(uri);
+
+            mFile = new File(Environment.getExternalStorageDirectory().getPath() + File.separator + "VideoCompressor" + "/Temp/", fileName);
+            out = new FileOutputStream(mFile, false);
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            out.flush();
+        } catch (IOException e) {
+            Log.e("PHEONIX", "", e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    Log.e("PHEONIX", "", e);
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    Log.e("PHEONIX", "", e);
+                }
+            }
+        }
+        return mFile;
     }
 }

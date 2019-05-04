@@ -229,6 +229,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //TODO ?
+    //     region lalongooo way
+//    private static final int RESULT_CODE_COMPRESS_VIDEO = 3;
+//    private static final String TAG = "MainActivity";
+//    private EditText editText;
+//    private ProgressBar progressBar;
+//    private File tempFile;
+//    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+//    protected void onActivityResult(int reqCode, int resCode, Intent data) {
+//        if (resCode == Activity.RESULT_OK && data != null) {
+//
+//            Uri uri = data.getData();
+//
+//            if (reqCode == RESULT_CODE_COMPRESS_VIDEO) {
+//                if (uri != null) {
+//                    Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+//
+//                    try {
+//                        if (cursor != null && cursor.moveToFirst()) {
+//
+//                            String displayName = cursor.getString(
+//                                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+//                            Log.i(TAG, "Display Name: " + displayName);
+//
+//                            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+//                            String size = null;
+//                            if (!cursor.isNull(sizeIndex)) {
+//                                size = cursor.getString(sizeIndex);
+//                            } else {
+//                                size = "Unknown";
+//                            }
+//                            Log.i(TAG, "Size: " + size);
+//
+//                            tempFile = Util.saveTempFile(displayName, this, uri);
+//                            editText.setText(tempFile.getPath());
+//
+//                        }
+//                    } finally {
+//                        if (cursor != null) {
+//                            cursor.close();
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+    //endregion
+
+
     private Locale getLocale() {
         Configuration config = getResources().getConfiguration();
         Locale sysLocale = null;
